@@ -1,13 +1,79 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="src/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + TS</title>
   </head>
-  <body>
-    <div id="app"></div>
+  <body class="bg-customBlue overflow-y-scroll h-screen">
+    <header>
+      <form class="max-w-md mx-auto my-4">   
+        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+        <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+            </div>
+            <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search a place..." required />
+            <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+        </div>
+      </form>
+    </header>
+
+    <div class="content">
+      <div class="flex flex-col justify-center items-center">
+
+      <div
+        class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center"
+      >
+        <div class="flex flex-col gap-2">
+          <!-- current-temperature -->
+          <div class="current-temperature text-white font-semibold font-sans text-7xl"></div>
+
+          <div class="weather-description flex font-sans text-lg text-white"></div>
+          <!-- weather-code -->
+  
+          <div class="flex flex-row">
+            <label for="apparent-temperature" class="flex font-sans font-light text-white text-sm mr-2 self-center">Feels like:</label>
+            <div class="apparent-temperature flex font-sans text-lg text-white self-center"></div>
+            <!-- apparent temperature -->
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-center">
+            <!-- weather description image -->
+            <img class="weather-icon w-24 h-24 mr-4" src="" alt="Weather Icon">
+          </div>
+          <div class="flex flex-row justify-center">
+            <img src="assets/sunrise.png" alt="sunrise" class="w-8 h-8" />
+            <label for="sunrise" class="flex font-sans font-light text-white text-sm m-2">Sunrise:</label>
+            <div class="sunrise-time flex font-sans text-base text-white self-center"></div>
+            <!-- sunrise -->
+          </div>
+  
+          <div class="flex flex-row justify-center">
+            <img src="assets/sunset.png" alt="sunset" class="w-8 h-8" />
+            <label for="sunset" class="flex font-sans text-white font-light text-sm m-2">Sunset:</label>
+            <div class="sunset-time flex font-sans text-base text-white self-center"></div>
+            <!-- sunset -->
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="seven-day-forecast mt-8 w-11/12">
+        <h2 class="text-2xl font-thin text-white mb-4">7-Day Forecast</h2>
+        <div class="forecast-container overflow-x-auto no-scrollbar py-2 pb-8 shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2">
+        </div>
+      </div>
+
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
