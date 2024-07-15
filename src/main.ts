@@ -1,24 +1,18 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import { get7DayForecast, getCurrentWeather } from "./api";
+import { update7DayForecast, updateWeather } from "./dom";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+async function init() {
+  try {
+    const currentWeather = await getCurrentWeather();
+    console.log(currentWeather);
+    updateWeather(currentWeather);
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+    const forecast = await get7DayForecast();
+    console.log(forecast);
+    update7DayForecast(forecast);
+  } catch (error) {
+    console.error("Error initializing weather data:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init);
