@@ -24,21 +24,21 @@
     </header>
 
     <div class="content">
-      <div class="flex justify-center items-center">
+      <div class="flex flex-col justify-center items-center">
 
       <div
-        class="flex flex-row gap-8 w-5/6 h-1/4 rounded-lg bg-sky-400 px-4 py-2 border border-black justify-center items-center"
+        class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center"
       >
         <div class="flex flex-col gap-2">
           <!-- current-temperature -->
-          <div class="current-temperature text-black font-semibold font-sans text-7xl"></div>
+          <div class="current-temperature text-white font-semibold font-sans text-7xl"></div>
 
-          <div class="weather-description flex font-sans text-lg"></div>
+          <div class="weather-description flex font-sans text-lg text-white"></div>
           <!-- weather-code -->
   
           <div class="flex flex-row">
-            <label for="apparent-temperature" class="flex font-sans font-light text-sm mr-2 self-center">Feels like:</label>
-            <div class="apparent-temperature flex font-sans text-lg self-center"></div>
+            <label for="apparent-temperature" class="flex font-sans font-light text-white text-sm mr-2 self-center">Feels like:</label>
+            <div class="apparent-temperature flex font-sans text-lg text-white self-center"></div>
             <!-- apparent temperature -->
           </div>
         </div>
@@ -46,19 +46,19 @@
         <div class="flex flex-col gap-2">
           <div class="flex justify-center">
             <!-- weather description image -->
-            <img class="weather-icon w-24 h-24" src="assets/sun.png" alt="weather description image">
+            <img class="weather-icon w-24 h-24 mr-4" src="" alt="Weather Icon">
           </div>
           <div class="flex flex-row justify-center">
-            <img src="assets/sunrise.png" alt="sunrise" class="w-6 h-6" />
-            <label for="sunrise" class="flex font-sans font-light text-sm m-2">Sunrise:</label>
-            <div class="flex font-sans text-base self-center">06:09</div>
+            <img src="assets/sunrise.png" alt="sunrise" class="w-8 h-8" />
+            <label for="sunrise" class="flex font-sans font-light text-white text-sm m-2">Sunrise:</label>
+            <div class="sunrise-time flex font-sans text-base text-white self-center"></div>
             <!-- sunrise -->
           </div>
   
           <div class="flex flex-row justify-center">
             <img src="assets/sunset.png" alt="sunset" class="w-8 h-8" />
-            <label for="sunset" class="flex font-sans font-light text-sm m-2">Sunset:</label>
-            <div class="flex font-sans text-base self-center">18:48</div>
+            <label for="sunset" class="flex font-sans text-white font-light text-sm m-2">Sunset:</label>
+            <div class="sunset-time flex font-sans text-base text-white self-center"></div>
             <!-- sunset -->
           </div>
         </div>
@@ -66,10 +66,9 @@
       </div>
 
 
-      <div class="seven-day-forecast mb-8">
-        <h2 class="text-xl font-bold text-white mb-4">7-Day Forecast</h2>
-        <div class="forecast-container overflow-x-auto whitespace-nowrap">
-          <!-- Forecast items will be inserted here by JavaScript -->
+      <div class="seven-day-forecast mt-8 w-11/12">
+        <h2 class="text-2xl font-thin text-white mb-4">7-Day Forecast</h2>
+        <div class="forecast-container overflow-x-auto no-scrollbar py-2 pb-8 shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2">
         </div>
       </div>
 

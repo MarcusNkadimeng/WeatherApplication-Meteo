@@ -4,7 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        customBlue: "#2A2E45",
+        customBlue: "#001021",
+        cardItemGreen: "#034748",
+        newColor: "#11B5E4",
+        cardItemBorder: "#1481BA",
       },
     },
   },

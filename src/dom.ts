@@ -4,7 +4,7 @@ import { DailyWeather } from "./dailyWeatherModel";
 function getWeatherDescription(weatherCode: number): string {
   switch (weatherCode) {
     case 0:
-      return "Clear sky";
+      return "Clear skies";
     case 1:
       return "Mainly clear";
     case 2:
@@ -124,8 +124,10 @@ export function updateWeatherIcon(weatherCode: number): void {
   const iconFileName = getWeatherIcon(weatherCode);
   const weatherIconElement = document.querySelector(".weather-icon");
   if (weatherIconElement) {
-    weatherIconElement.setAttribute("src", `assets/${iconFileName}`);
+    weatherIconElement.setAttribute("src", iconFileName);
     weatherIconElement.setAttribute("alt", getWeatherDescription(weatherCode));
+  } else {
+    console.error("No element found with class .weather-icon");
   }
 }
 
@@ -143,11 +145,31 @@ export function updateApparentTemperature(temp: number): void {
   }
 }
 
+export function updateSunriseTime(time: string) {
+  const sunriseElement = document.querySelector(".sunrise-time");
+  if (sunriseElement) {
+    sunriseElement.textContent = `${time}`;
+  }
+}
+
+export function updateSunsetTime(time: string) {
+  const sunsetElement = document.querySelector(".sunset-time");
+  if (sunsetElement) {
+    sunsetElement.textContent = `${time}`;
+  }
+}
+
 // MARK: - Current weather update function
-export function updateWeather(currentWeather: currentWeather) {
+export function updateWeather(
+  currentWeather: currentWeather,
+  todayWeather: DailyWeather
+) {
   updateCurrentTemperature(currentWeather.temperature_2m);
   updateWeatherDescription(currentWeather.weather_code);
   updateApparentTemperature(currentWeather.apparent_temperature);
+  updateWeatherIcon(currentWeather.weather_code);
+  updateSunriseTime(todayWeather.sunrise);
+  updateSunsetTime(todayWeather.sunset);
 }
 
 // MARK: - 7-day weather forecast
@@ -164,11 +186,15 @@ export function update7DayForecast(forecast: DailyWeather[]) {
     forecastDayDiv.classList.add(
       "forecast-day",
       "flex",
-      "flex-row",
+      "flex-col",
       "justify-between",
       "bg-gray-200",
       "p-4",
-      "rounded-lg"
+      "rounded-lg",
+      "border",
+      "border-cardItemBorder",
+      "shadow-lg",
+      "shadow-cyan-500/50"
     );
 
     const dayNameDiv = document.createElement("div");
@@ -177,24 +203,71 @@ export function update7DayForecast(forecast: DailyWeather[]) {
       weekday: "long",
     });
 
+    const divider = document.createElement("hr");
+    divider.classList.add(
+      "section-divider",
+      "h-0.5",
+      "m-0.5",
+      "bg-black",
+      "border-0"
+    );
+
     const temperatureDiv = document.createElement("div");
-    temperatureDiv.classList.add("temperature", "text-black");
+    temperatureDiv.classList.add(
+      "temperature",
+      "text-black",
+      "justify-center",
+      "self-center"
+    );
     temperatureDiv.textContent = `${day.temperature_max}˚ / ${day.temperature_min}˚`;
 
     const weatherCodeDiv = document.createElement("div");
-    weatherCodeDiv.classList.add("weather-code", "text-black");
+    weatherCodeDiv.classList.add(
+      "weather-code",
+      "text-black",
+      "justify-center",
+      "self-center"
+    );
     weatherCodeDiv.textContent = getWeatherDescription(day.weather_code);
 
     const weatherIconImg = document.createElement("img");
-    weatherIconImg.classList.add("weather-icon");
-    weatherIconImg.src = `assets/${getWeatherIcon(day.weather_code)}`;
+    weatherIconImg.classList.add(
+      "weather-icon",
+      "w-8",
+      "h-8",
+      "justify-center",
+      "self-center"
+    );
+    weatherIconImg.src = getWeatherIcon(day.weather_code);
     weatherIconImg.alt = getWeatherDescription(day.weather_code);
 
+    const precipitation_symbol = document.createElement("img");
+    precipitation_symbol.setAttribute("src", "assets/precipitation.png");
+    precipitation_symbol.setAttribute("alt", "Precipitation symbol");
+
     const precipitationDiv = document.createElement("div");
-    precipitationDiv.classList.add("precipitation-sum", "text-black");
-    precipitationDiv.textContent = "day.precipitation_sum";
+    precipitationDiv.classList.add(
+      "flex",
+      "flex-row",
+      "precipitation-sum",
+      "text-black",
+      "justify-center",
+      "self-center"
+    );
+
+    const precipitationImg = document.createElement("img");
+    precipitationImg.src = "assets/precipitation.png"; // Path to your precipitation image
+    precipitationImg.alt = "Precipitation";
+    precipitationImg.classList.add("w-8", "h-8", "mr-2");
+
+    const precipitationText = document.createElement("span");
+    precipitationText.textContent = `${day.precipitation_sum}mm`;
+
+    precipitationDiv.appendChild(precipitationImg);
+    precipitationDiv.appendChild(precipitationText);
 
     forecastDayDiv.appendChild(dayNameDiv);
+    forecastDayDiv.appendChild(divider);
     forecastDayDiv.appendChild(temperatureDiv);
     forecastDayDiv.appendChild(weatherCodeDiv);
     forecastDayDiv.appendChild(weatherIconImg);

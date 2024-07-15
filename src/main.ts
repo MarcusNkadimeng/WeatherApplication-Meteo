@@ -5,10 +5,10 @@ async function init() {
   try {
     const currentWeather = await getCurrentWeather();
     console.log(currentWeather);
-    updateWeather(currentWeather);
 
     const forecast = await get7DayForecast();
     console.log(forecast);
+    updateWeather(currentWeather, forecast[0]);
     update7DayForecast(forecast);
   } catch (error) {
     console.error("Error initializing weather data:", error);
