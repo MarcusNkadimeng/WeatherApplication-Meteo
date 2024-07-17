@@ -98,3 +98,35 @@ export async function getPlaceCurrentWeather(
     throw error;
   }
 }
+
+export async function getPlace7DayForecast(
+  latitude: number,
+  longitude: number
+): Promise<DailyWeather[]> {
+  try {
+    const dailyWeatherRes = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto`
+    );
+
+    if (!dailyWeatherRes.ok) {
+      throw new Error(
+        `Error fetching 7-day weather data: ${dailyWeatherRes.statusText}`
+      );
+    }
+
+    const dailyWeatherJSON = await dailyWeatherRes.json();
+
+    return dailyWeatherJSON.daily.time.map((date: string, index: number) => ({
+      date,
+      weather_code: dailyWeatherJSON.daily.weather_code[index],
+      temperature_max: dailyWeatherJSON.daily.temperature_2m_max[index],
+      temperature_min: dailyWeatherJSON.daily.temperature_2m_min[index],
+      sunrise: formatTime(dailyWeatherJSON.daily.sunrise[index]),
+      sunset: formatTime(dailyWeatherJSON.daily.sunset[index]),
+      precipitation_sum: dailyWeatherJSON.daily.precipitation_sum[index],
+    }));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}

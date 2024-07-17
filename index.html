@@ -172,6 +172,33 @@
       </div>
     </div>
 
+    <div
+      id="places-weather-modal"
+      class="modal fixed top-0 left-0 w-full h-full flex items-center justify-center z-50"
+      style="display: none"
+    >
+      <div
+        class="modal-backdrop fixed top-0 left-0 w-full h-full bg-black opacity-50"
+      ></div>
+      <div
+        class="modal-content relative bg-white p-6 rounded-lg shadow-lg z-10"
+      >
+        <span
+          id="close-modal-btn-two"
+          class="close-modal-btn-two text-gray-950 text-2xl cursor-pointer absolute top-2 right-4"
+          >&times;</span
+        >
+        <div id="place-modal-weather-details"></div>
+        <button
+          id="make-default-btn"
+          class="mt-4 bg-blue-500 text-white p-2 rounded"
+        >
+          Make Default Location
+        </button>
+      </div>
+    </div>
+
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
