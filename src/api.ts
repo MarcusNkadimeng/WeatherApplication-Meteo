@@ -1,6 +1,7 @@
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { convertToCurrentWeather, formatTime } from "./util";
+import { Location } from "./location";
 
 export async function getCurrentWeather(): Promise<currentWeather> {
   try {
@@ -45,6 +46,53 @@ export async function get7DayForecast(): Promise<DailyWeather[]> {
       sunset: formatTime(dailyWeatherJSON.daily.sunset[index]),
       precipitation_sum: dailyWeatherJSON.daily.precipitation_sum[index],
     }));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function getCoordinates(searchQuery: string): Promise<Location[]> {
+  try {
+    const response = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${searchQuery}&count=10&language=en&format=json`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error fetching coordinates: ${response.statusText}`);
+    }
+
+    const locationData = await response.json();
+
+    return locationData.results.slice(0, 5).map((result: any) => ({
+      name: result.name,
+      latitude: result.latitude,
+      longitude: result.longitude,
+      country: result.country,
+    }));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function getPlaceCurrentWeather(
+  latitude: number,
+  longitude: number
+): Promise<currentWeather> {
+  try {
+    const currentWeatherRes = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
+    );
+
+    if (!currentWeatherRes.ok) {
+      throw new Error(
+        `Error fetching weather data: ${currentWeatherRes.statusText}`
+      );
+    }
+
+    const currentWeatherJSON = await currentWeatherRes.json();
+    return convertToCurrentWeather(currentWeatherJSON.current);
   } catch (error) {
     console.error(error);
     throw error;
