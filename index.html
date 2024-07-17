@@ -9,69 +9,167 @@
   </head>
   <body class="bg-customBlue overflow-y-scroll h-screen">
     <header>
-      <form class="max-w-md mx-auto my-4">   
-        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+      <form class="w-11/12 mx-auto mt-4 mb-2">
+        <label
+          for="default-search"
+          class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+          >Search</label
+        >
         <div class="relative">
-            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                </svg>
-            </div>
-            <input type="search" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search a place..." required />
-            <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+          <div
+            class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
+          >
+            <svg
+              class="w-4 h-4 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </div>
+          <input
+            type="search"
+            id="search-bar"
+            class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Search a place..."
+            required
+          />
+          <div class="absolute right-2 top-2">
+            <button
+              type="button"
+              id="clear-btn"
+              class="text-white bg-gray-500 hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-3xl text-sm px-2 py-1 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+            >
+              x
+            </button>
+            <button
+              type="submit"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Search
+            </button>
+          </div>
         </div>
       </form>
+      <div
+        class="results-container bg-slate-300 mt-1 mb-2 w-11/12 mx-auto rounded-md overflow-auto"
+        id="results-container"
+      ></div>
     </header>
+
+    <div
+      id="weather-modal"
+      class="modal fixed top-0 left-0 w-full h-full flex items-center justify-center z-50"
+      style="display: none"
+    >
+      <div
+        class="modal-backdrop fixed top-0 left-0 w-full h-full bg-black opacity-50"
+      ></div>
+      <div
+        class="modal-content relative bg-white p-6 rounded-lg shadow-lg z-10"
+      >
+        <span
+          id="close-modal-btn"
+          class="close-modal-btn text-gray-950 text-2xl cursor-pointer absolute top-2 right-4"
+          >&times;</span
+        >
+        <div id="modal-weather-details"></div>
+        <button
+          id="add-to-places"
+          class="mt-4 bg-blue-500 text-white p-2 rounded"
+        >
+          Add to Places
+        </button>
+      </div>
+    </div>
 
     <div class="content">
       <div class="flex flex-col justify-center items-center">
+        <div
+          class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center"
+        >
+          <div class="flex flex-col gap-2">
+            <!-- current-temperature -->
+            <div
+              class="current-temperature text-white font-semibold font-sans text-7xl"
+            ></div>
 
-      <div
-        class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center"
-      >
-        <div class="flex flex-col gap-2">
-          <!-- current-temperature -->
-          <div class="current-temperature text-white font-semibold font-sans text-7xl"></div>
+            <div
+              class="weather-description flex font-sans text-lg text-white"
+            ></div>
+            <!-- weather-code -->
 
-          <div class="weather-description flex font-sans text-lg text-white"></div>
-          <!-- weather-code -->
-  
-          <div class="flex flex-row">
-            <label for="apparent-temperature" class="flex font-sans font-light text-white text-sm mr-2 self-center">Feels like:</label>
-            <div class="apparent-temperature flex font-sans text-lg text-white self-center"></div>
-            <!-- apparent temperature -->
+            <div class="flex flex-row">
+              <label
+                for="apparent-temperature"
+                class="flex font-sans font-light text-white text-sm mr-2 self-center"
+                >Feels like:</label
+              >
+              <div
+                class="apparent-temperature flex font-sans text-lg text-white self-center"
+              ></div>
+              <!-- apparent temperature -->
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-center">
+              <!-- weather description image -->
+              <img
+                class="weather-icon w-24 h-24 mr-4"
+                src=""
+                alt="Weather Icon"
+              />
+            </div>
+            <div class="flex flex-row justify-center">
+              <img src="assets/sunrise.png" alt="sunrise" class="w-8 h-8" />
+              <label
+                for="sunrise"
+                class="flex font-sans font-light text-white text-sm m-2"
+                >Sunrise:</label
+              >
+              <div
+                class="sunrise-time flex font-sans text-base text-white self-center"
+              ></div>
+              <!-- sunrise -->
+            </div>
+
+            <div class="flex flex-row justify-center">
+              <img src="assets/sunset.png" alt="sunset" class="w-8 h-8" />
+              <label
+                for="sunset"
+                class="flex font-sans text-white font-light text-sm m-2"
+                >Sunset:</label
+              >
+              <div
+                class="sunset-time flex font-sans text-base text-white self-center"
+              ></div>
+              <!-- sunset -->
+            </div>
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <div class="flex justify-center">
-            <!-- weather description image -->
-            <img class="weather-icon w-24 h-24 mr-4" src="" alt="Weather Icon">
-          </div>
-          <div class="flex flex-row justify-center">
-            <img src="assets/sunrise.png" alt="sunrise" class="w-8 h-8" />
-            <label for="sunrise" class="flex font-sans font-light text-white text-sm m-2">Sunrise:</label>
-            <div class="sunrise-time flex font-sans text-base text-white self-center"></div>
-            <!-- sunrise -->
-          </div>
-  
-          <div class="flex flex-row justify-center">
-            <img src="assets/sunset.png" alt="sunset" class="w-8 h-8" />
-            <label for="sunset" class="flex font-sans text-white font-light text-sm m-2">Sunset:</label>
-            <div class="sunset-time flex font-sans text-base text-white self-center"></div>
-            <!-- sunset -->
-          </div>
+        <div class="seven-day-forecast mt-8 w-11/12">
+          <h2 class="text-2xl font-thin text-white mb-4">7-Day Forecast</h2>
+          <div
+            class="forecast-container overflow-x-auto no-scrollbar py-2 pb-8 shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2"
+          ></div>
         </div>
 
+        <div class="my-places mt-8 w-11/12">
+          <h2 class="text-2xl font-thin text-white mb-4">My Places</h2>
+          <div class="places-container overflow-x-auto no-scrollbar py-2 pb-8
+          shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2">
+        </div>
       </div>
-
-
-      <div class="seven-day-forecast mt-8 w-11/12">
-        <h2 class="text-2xl font-thin text-white mb-4">7-Day Forecast</h2>
-        <div class="forecast-container overflow-x-auto no-scrollbar py-2 pb-8 shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2">
-        </div>
-      </div>
-
     </div>
 
     <script type="module" src="/src/main.ts"></script>

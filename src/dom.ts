@@ -1,5 +1,7 @@
+import { getCoordinates, getPlaceCurrentWeather } from "./api";
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
+import { Location } from "./location";
 
 function getWeatherDescription(weatherCode: number): string {
   switch (weatherCode) {
@@ -274,5 +276,183 @@ export function update7DayForecast(forecast: DailyWeather[]) {
     forecastDayDiv.appendChild(precipitationDiv);
 
     forecastContainer.appendChild(forecastDayDiv);
+  });
+}
+
+export async function handleSearch() {
+  const searchInput = (
+    document.getElementById("search-bar") as HTMLInputElement
+  ).value;
+
+  try {
+    const locations: Location[] = await getCoordinates(searchInput);
+    displaySearchResults(locations);
+  } catch (error) {
+    console.error("Error handling search:", error);
+  }
+}
+
+export function displaySearchResults(locations: Location[]) {
+  const resultsContainer = document.getElementById("results-container");
+  if (!resultsContainer) return;
+
+  resultsContainer.innerHTML = "";
+
+  locations.forEach((location) => {
+    const resultItem = document.createElement("div");
+    resultItem.className = "result-item text-xl h-10 cursor-pointer";
+    resultItem.textContent = `${location.name} (${location.latitude}, ${location.longitude}, ${location.country})`;
+
+    const divider = document.createElement("hr");
+    divider.classList.add(
+      "section-divider",
+      "h-0.5",
+      "m-0.5",
+      "bg-gray-500",
+      "border-0"
+    );
+
+    resultItem.addEventListener("click", async () => {
+      try {
+        const weatherData: currentWeather = await getPlaceCurrentWeather(
+          location.latitude,
+          location.longitude
+        );
+        showModal(location, weatherData);
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+      }
+    });
+
+    resultsContainer.appendChild(resultItem);
+    resultsContainer.appendChild(divider);
+  });
+
+  const clearBtn = document.getElementById("clear-btn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", clearSearch);
+  }
+}
+
+function clearSearch() {
+  const searchBar = document.getElementById("search-bar") as HTMLInputElement;
+  const resultsContainer = document.getElementById("results-container");
+
+  if (searchBar) {
+    searchBar.value = "";
+  }
+
+  if (resultsContainer) {
+    resultsContainer.innerHTML = "";
+  }
+}
+
+function showModal(location: Location, weatherData: currentWeather) {
+  const modal = document.getElementById("weather-modal");
+  if (!modal) return;
+
+  document.body.classList.add("modal-open");
+  modal.style.display = "flex";
+
+  const modalContent = document.getElementById("modal-weather-details");
+  if (!modalContent) return;
+
+  modalContent.innerHTML = `
+    <h2 class="text-3xl">${location.name}</h2>
+    <p>Temperature: ${weatherData.temperature_2m}˚C</p>
+    <p>${getWeatherDescription(weatherData.weather_code)}</p>
+    <img src="${getWeatherIcon(
+      weatherData.weather_code
+    )}" alt="${getWeatherDescription(
+    weatherData.weather_code
+  )}" class="w-8 h-8"/>
+  `;
+
+  const addToPlacesBtn = document.getElementById("add-to-places");
+  if (addToPlacesBtn) {
+    addToPlacesBtn.onclick = () => {
+      addToPlaces(location);
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+    addToPlacesBtn.addEventListener("click", clearSearch);
+  }
+
+  const closeModalBtn = document.getElementById("close-modal-btn");
+  if (closeModalBtn) {
+    closeModalBtn.onclick = () => {
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+    closeModalBtn.addEventListener("click", clearSearch);
+  }
+}
+
+function addToPlaces(location: Location) {
+  const places = JSON.parse(localStorage.getItem("places") || "[]");
+  console.log(places);
+  places.push(location);
+  localStorage.setItem("places", JSON.stringify(places));
+  displayMyPlaces();
+}
+
+// MARK: - My Places weather details
+export function displayMyPlaces() {
+  const places: Location[] = JSON.parse(localStorage.getItem("places") || "[]");
+  const placesContainer = document.querySelector(".places-container");
+  if (!placesContainer) return;
+
+  placesContainer.innerHTML = "";
+
+  places.forEach(async (place: Location) => {
+    try {
+      const weatherData: currentWeather = await getPlaceCurrentWeather(
+        place.latitude,
+        place.longitude
+      );
+      const placeDiv = document.createElement("div");
+      placeDiv.classList.add(
+        "place-card",
+        "flex",
+        "flex-col",
+        "justify-between",
+        "bg-gray-200",
+        "p-4",
+        "rounded-lg",
+        "justify-between",
+        "border",
+        "border-cardItemBorder",
+        "shadow-lg",
+        "shadow-cyan-500/50",
+        "items-center"
+      );
+
+      const cityNameDiv = document.createElement("div");
+      cityNameDiv.classList.add("city", "text-black", "text-lg");
+      cityNameDiv.textContent = place.name;
+
+      const temperatureDiv = document.createElement("div");
+      temperatureDiv.classList.add("temperature", "text-black", "text-sm");
+      temperatureDiv.textContent = `${weatherData.temperature_2m}˚C`;
+
+      const weatherIcon = document.createElement("img");
+      weatherIcon.classList.add(
+        "weather-icon",
+        "w-8",
+        "h-8",
+        "justify-center",
+        "self-center"
+      );
+      weatherIcon.src = getWeatherIcon(weatherData.weather_code);
+      weatherIcon.alt = getWeatherDescription(weatherData.weather_code);
+
+      placeDiv.appendChild(cityNameDiv);
+      placeDiv.appendChild(temperatureDiv);
+      placeDiv.appendChild(weatherIcon);
+
+      placesContainer.appendChild(placeDiv);
+    } catch (error) {
+      console.error(`Error fetching weather data for ${place.name}:`, error);
+    }
   });
 }

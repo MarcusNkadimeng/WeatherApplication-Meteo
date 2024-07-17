@@ -1,5 +1,10 @@
 import { get7DayForecast, getCurrentWeather } from "./api";
-import { update7DayForecast, updateWeather } from "./dom";
+import {
+  displayMyPlaces,
+  handleSearch,
+  update7DayForecast,
+  updateWeather,
+} from "./dom";
 
 async function init() {
   try {
@@ -10,9 +15,19 @@ async function init() {
     console.log(forecast);
     updateWeather(currentWeather, forecast[0]);
     update7DayForecast(forecast);
+
+    const searchForm = document.querySelector("form");
+    if (searchForm) {
+      searchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        handleSearch();
+      });
+    }
   } catch (error) {
     console.error("Error initializing weather data:", error);
   }
+
+  displayMyPlaces();
 }
 
 document.addEventListener("DOMContentLoaded", init);
