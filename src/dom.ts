@@ -6,6 +6,7 @@ import {
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { Location } from "./location";
+import { addMarker } from "./openstreetmap";
 import { convertDirection } from "./util";
 
 function getWeatherDescription(weatherCode: number): string {
@@ -306,7 +307,7 @@ export function displaySearchResults(locations: Location[]) {
   locations.forEach((location) => {
     const resultItem = document.createElement("div");
     resultItem.className = "result-item text-xl h-10 cursor-pointer";
-    resultItem.textContent = `${location.name} (${location.latitude}, ${location.longitude}, ${location.country})`;
+    resultItem.textContent = `${location.name}, ${location.country})`;
 
     const divider = document.createElement("hr");
     divider.classList.add(
@@ -352,7 +353,7 @@ function clearSearch() {
   }
 }
 
-function showModal(location: Location, weatherData: currentWeather) {
+export function showModal(location: Location, weatherData: currentWeather) {
   const modal = document.getElementById("weather-modal");
   if (!modal) return;
 
@@ -399,6 +400,7 @@ function addToPlaces(location: Location) {
   places.push(location);
   localStorage.setItem("places", JSON.stringify(places));
   displayMyPlaces();
+  addMarker(location);
 }
 
 // MARK: - My Places weather details
