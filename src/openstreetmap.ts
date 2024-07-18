@@ -37,7 +37,6 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
     );
     const data = await response.json();
     const address = data.address;
-    // Extract the city name or use another suitable field
     const placeName =
       address.city ||
       address.town ||

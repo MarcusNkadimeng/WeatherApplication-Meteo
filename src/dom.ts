@@ -306,8 +306,9 @@ export function displaySearchResults(locations: Location[]) {
 
   locations.forEach((location) => {
     const resultItem = document.createElement("div");
-    resultItem.className = "result-item text-xl h-10 cursor-pointer";
-    resultItem.textContent = `${location.name}, ${location.country})`;
+    resultItem.className =
+      "flex result-item text-xl h-10 cursor-pointer self-center";
+    resultItem.textContent = `${location.name}, ${location.country}`;
 
     const divider = document.createElement("hr");
     divider.classList.add(
@@ -372,6 +373,13 @@ export function showModal(location: Location, weatherData: currentWeather) {
     )}" alt="${getWeatherDescription(
     weatherData.weather_code
   )}" class="w-8 h-8"/>
+    <div class="flex flex-row">
+      <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
+      />
+      <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
+    weatherData.wind_direction_10m
+  )}</p>
+    </div>
   `;
 
   const addToPlacesBtn = document.getElementById("add-to-places");
@@ -490,7 +498,7 @@ function showLocationDetailsModal(
     )}" alt="${getWeatherDescription(
     weatherData.weather_code
   )}" class="w-8 h-8"/>
-    <div class="flex flex-row justify-center">
+    <div class="flex flex-row">
     <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
     />
     <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
@@ -512,7 +520,12 @@ function showLocationDetailsModal(
           location.latitude,
           location.longitude
         );
-        updateWeather(defaultWeather, defaultDailyWeather[0]); // Assuming first entry is for today
+        const defaultPlaceLabel = document.querySelector(".defaultPlace-label");
+        if (defaultPlaceLabel) {
+          defaultPlaceLabel.textContent = location.name;
+        }
+
+        updateWeather(defaultWeather, defaultDailyWeather[0]);
         update7DayForecast(defaultDailyWeather);
         console.log("Current weather for: ", location, defaultWeather);
         console.log("7 day forecast for: ", location, defaultDailyWeather[0]);
