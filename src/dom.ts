@@ -1,7 +1,12 @@
-import { getCoordinates, getPlaceCurrentWeather } from "./api";
+import {
+  getCoordinates,
+  getPlace7DayForecast,
+  getPlaceCurrentWeather,
+} from "./api";
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { Location } from "./location";
+import { convertDirection } from "./util";
 
 function getWeatherDescription(weatherCode: number): string {
   switch (weatherCode) {
@@ -446,6 +451,10 @@ export function displayMyPlaces() {
       weatherIcon.src = getWeatherIcon(weatherData.weather_code);
       weatherIcon.alt = getWeatherDescription(weatherData.weather_code);
 
+      placeDiv.addEventListener("click", () => {
+        showLocationDetailsModal(place, weatherData);
+      });
+
       placeDiv.appendChild(cityNameDiv);
       placeDiv.appendChild(temperatureDiv);
       placeDiv.appendChild(weatherIcon);
@@ -455,4 +464,69 @@ export function displayMyPlaces() {
       console.error(`Error fetching weather data for ${place.name}:`, error);
     }
   });
+}
+
+function showLocationDetailsModal(
+  location: Location,
+  weatherData: currentWeather
+) {
+  const modal = document.getElementById("places-weather-modal");
+  if (!modal) return;
+
+  document.body.classList.add("modal-open");
+  modal.style.display = "flex";
+
+  const modalContent = document.getElementById("place-modal-weather-details");
+  if (!modalContent) return;
+
+  modalContent.innerHTML = `
+    <h2 class="text-3xl">${location.name}</h2>
+    <p>Temperature: ${weatherData.temperature_2m}˚C</p>
+    <p>${getWeatherDescription(weatherData.weather_code)}</p>
+    <img src="${getWeatherIcon(
+      weatherData.weather_code
+    )}" alt="${getWeatherDescription(
+    weatherData.weather_code
+  )}" class="w-8 h-8"/>
+    <div class="flex flex-row justify-center">
+    <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
+    />
+    <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
+    weatherData.wind_direction_10m
+  )}</p>
+    </div>
+  `;
+
+  const makeDefaultBtn = document.getElementById("make-default-btn");
+  if (makeDefaultBtn) {
+    makeDefaultBtn.onclick = async () => {
+      localStorage.setItem("defaultLocation", JSON.stringify(location));
+      try {
+        const defaultWeather = await getPlaceCurrentWeather(
+          location.latitude,
+          location.longitude
+        );
+        const defaultDailyWeather = await getPlace7DayForecast(
+          location.latitude,
+          location.longitude
+        );
+        updateWeather(defaultWeather, defaultDailyWeather[0]); // Assuming first entry is for today
+        update7DayForecast(defaultDailyWeather);
+        console.log("Current weather for: ", location, defaultWeather);
+        console.log("7 day forecast for: ", location, defaultDailyWeather[0]);
+      } catch (error) {
+        console.error("Error fetching default location weather data:", error);
+      }
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+  }
+
+  const closeModalBtn = document.getElementById("close-modal-btn-two");
+  if (closeModalBtn) {
+    closeModalBtn.onclick = () => {
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open-two");
+    };
+  }
 }
