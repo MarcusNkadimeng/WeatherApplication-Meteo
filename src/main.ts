@@ -1,20 +1,37 @@
-import { get7DayForecast, getCurrentWeather } from "./api";
+import { getPlace7DayForecast, getPlaceCurrentWeather } from "./api";
 import {
   displayMyPlaces,
   handleSearch,
   update7DayForecast,
   updateWeather,
 } from "./dom";
+import { fetchLiveLocationDetails } from "./liveLocationUtil";
 
 async function init() {
   try {
-    const currentWeather = await getCurrentWeather();
-    console.log(currentWeather);
+    const defaultLocation = JSON.parse(
+      localStorage.getItem("defaultLocation") || "null"
+    );
+    if (defaultLocation) {
+      // Fetch weather details for the default location
+      const weatherData = await getPlaceCurrentWeather(
+        defaultLocation.latitude,
+        defaultLocation.longitude
+      );
+      const dailyWeather = await getPlace7DayForecast(
+        defaultLocation.latitude,
+        defaultLocation.longitude
+      );
 
-    const forecast = await get7DayForecast();
-    console.log(forecast);
-    updateWeather(currentWeather, forecast[0]);
-    update7DayForecast(forecast);
+      const defaultPlaceLabel = document.querySelector(".defaultPlace-label");
+      if (defaultPlaceLabel) {
+        defaultPlaceLabel.textContent = defaultLocation.name;
+      }
+      updateWeather(weatherData, dailyWeather[0]);
+      update7DayForecast(dailyWeather);
+    } else {
+      fetchLiveLocationDetails();
+    }
 
     const searchForm = document.querySelector("form");
     if (searchForm) {

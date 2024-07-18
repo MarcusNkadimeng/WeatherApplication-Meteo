@@ -26,11 +26,12 @@ map.on("click", async (event) => {
   };
   showModal(location, weatherData);
   console.log(location, weatherData);
-
-  L.marker([lat, lng]).addTo(map).bindPopup(location.name);
 });
 
-async function reverseGeocode(lat: number, lng: number): Promise<string> {
+export async function reverseGeocode(
+  lat: number,
+  lng: number
+): Promise<string> {
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`

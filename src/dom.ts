@@ -1,12 +1,13 @@
 import {
   getCoordinates,
+  getLiveLocation,
   getPlace7DayForecast,
   getPlaceCurrentWeather,
 } from "./api";
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { Location } from "./location";
-import { addMarker } from "./openstreetmap";
+import { addMarker, reverseGeocode } from "./openstreetmap";
 import { convertDirection } from "./util";
 
 function getWeatherDescription(weatherCode: number): string {
@@ -139,6 +140,22 @@ export function updateWeatherIcon(weatherCode: number): void {
   }
 }
 
+export async function updateLocationName() {
+  const locationLabel = document.querySelector(".defaultPlace-label");
+  if (locationLabel) {
+    const defaultLocation = JSON.parse(
+      localStorage.getItem("defaultLocation") || "{}"
+    );
+    if (Object.keys(defaultLocation).length !== 0) {
+      locationLabel.textContent = defaultLocation.name;
+    } else {
+      const { lat, lng } = await getLiveLocation();
+      const placeName = await reverseGeocode(lat, lng);
+      locationLabel.textContent = placeName;
+    }
+  }
+}
+
 export function updateCurrentTemperature(temp: number) {
   const tempElement = document.querySelector(".current-temperature");
   if (tempElement) {
@@ -172,6 +189,12 @@ export function updateWeather(
   currentWeather: currentWeather,
   todayWeather: DailyWeather
 ) {
+  const defaultLocation = JSON.parse(
+    localStorage.getItem("defaultLocation") || "{}"
+  );
+  if (Object.keys(defaultLocation).length === 0) {
+    updateLocationName();
+  }
   updateCurrentTemperature(currentWeather.temperature_2m);
   updateWeatherDescription(currentWeather.weather_code);
   updateApparentTemperature(currentWeather.apparent_temperature);
