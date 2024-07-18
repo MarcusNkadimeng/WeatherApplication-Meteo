@@ -6,6 +6,7 @@ import {
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { Location } from "./location";
+import { convertDirection } from "./util";
 
 function getWeatherDescription(weatherCode: number): string {
   switch (weatherCode) {
@@ -487,8 +488,13 @@ function showLocationDetailsModal(
     )}" alt="${getWeatherDescription(
     weatherData.weather_code
   )}" class="w-8 h-8"/>
-    <p>Wind speed: ${weatherData.wind_speed_10m}km/h</p>
-    <p>Wind direction: ${weatherData.wind_direction_10m}˚</p>
+    <div class="flex flex-row justify-center">
+    <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
+    />
+    <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
+    weatherData.wind_direction_10m
+  )}</p>
+    </div>
   `;
 
   const makeDefaultBtn = document.getElementById("make-default-btn");
