@@ -1,4 +1,8 @@
-import { getPlace7DayForecast, getPlaceCurrentWeather } from "./api";
+import {
+  getLiveLocationReverseGeocode,
+  getPlace7DayForecast,
+  getPlaceCurrentWeather,
+} from "./api";
 import {
   displayMyPlaces,
   handleSearch,
@@ -22,12 +26,15 @@ async function init() {
         defaultLocation.latitude,
         defaultLocation.longitude
       );
-
       const defaultPlaceLabel = document.querySelector(".defaultPlace-label");
       if (defaultPlaceLabel) {
         defaultPlaceLabel.textContent = defaultLocation.name;
       }
-      updateWeather(weatherData, dailyWeather[0]);
+      updateWeather(
+        weatherData,
+        dailyWeather[0],
+        getLiveLocationReverseGeocode
+      );
       update7DayForecast(dailyWeather);
     } else {
       fetchLiveLocationDetails();

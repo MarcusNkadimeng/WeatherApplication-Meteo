@@ -1,5 +1,6 @@
 import {
   getLiveLocation,
+  getLiveLocationReverseGeocode,
   getPlace7DayForecast,
   getPlaceCurrentWeather,
 } from "./api";
@@ -14,7 +15,7 @@ export async function fetchLiveLocationDetails() {
 
     const forecast = await getPlace7DayForecast(lat, lng);
 
-    updateWeather(currentWeather, forecast[0]);
+    updateWeather(currentWeather, forecast[0], getLiveLocationReverseGeocode);
     update7DayForecast(forecast);
   } catch (error) {
     console.error("Error fetching live location details:", error);

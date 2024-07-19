@@ -1,7 +1,7 @@
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
 import { convertToCurrentWeather, formatTime } from "./util";
-import { Location } from "./location";
+import { Location } from "./locationModel";
 
 export async function getCoordinates(searchQuery: string): Promise<Location[]> {
   try {
@@ -101,4 +101,33 @@ export async function getLiveLocation(): Promise<{ lat: number; lng: number }> {
       reject(new Error("Geolocation is not supported by this browser."));
     }
   });
+}
+
+export async function reverseGeocode(
+  lat: number,
+  lng: number
+): Promise<string> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await response.json();
+    const address = data.address;
+    const placeName =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.hamlet ||
+      address.suburb ||
+      `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+    return placeName;
+  } catch (error) {
+    console.error("Error reverse geocoding:", error);
+    return `Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+  }
+}
+
+export async function getLiveLocationReverseGeocode(): Promise<string> {
+  const { lat, lng } = await getLiveLocation();
+  return await reverseGeocode(lat, lng);
 }

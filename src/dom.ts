@@ -1,13 +1,13 @@
 import {
   getCoordinates,
-  getLiveLocation,
+  getLiveLocationReverseGeocode,
   getPlace7DayForecast,
   getPlaceCurrentWeather,
 } from "./api";
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
-import { Location } from "./location";
-import { addMarker, reverseGeocode } from "./openstreetmap";
+import { Location } from "./locationModel";
+import { addMarker } from "./openstreetmap";
 import {
   convertDirection,
   getWeatherDescription,
@@ -35,7 +35,7 @@ export function updateWeatherIcon(weatherCode: number): void {
   }
 }
 
-export async function updateLocationName() {
+export async function updateLocationName(callback: () => Promise<string>) {
   const locationLabel = document.querySelector(".defaultPlace-label");
   if (locationLabel) {
     const defaultLocation = JSON.parse(
@@ -44,9 +44,7 @@ export async function updateLocationName() {
     if (Object.keys(defaultLocation).length !== 0) {
       locationLabel.textContent = defaultLocation.name;
     } else {
-      const { lat, lng } = await getLiveLocation();
-      const placeName = await reverseGeocode(lat, lng);
-      locationLabel.textContent = placeName;
+      locationLabel.textContent = await callback();
     }
   }
 }
@@ -82,13 +80,14 @@ export function updateSunsetTime(time: string) {
 // MARK: - Current weather update function
 export function updateWeather(
   currentWeather: currentWeather,
-  todayWeather: DailyWeather
+  todayWeather: DailyWeather,
+  liveLocationGeocode: () => Promise<string>
 ) {
   const defaultLocation = JSON.parse(
     localStorage.getItem("defaultLocation") || "{}"
   );
   if (Object.keys(defaultLocation).length === 0) {
-    updateLocationName();
+    updateLocationName(liveLocationGeocode);
   }
   updateCurrentTemperature(currentWeather.temperature_2m);
   updateWeatherDescription(currentWeather.weather_code);
@@ -115,12 +114,13 @@ export function update7DayForecast(forecast: DailyWeather[]) {
       "flex-col",
       "justify-between",
       "bg-gray-200",
-      "p-4",
+      "p-2",
       "rounded-lg",
       "border",
       "border-cardItemBorder",
       "shadow-lg",
-      "shadow-cyan-500/50"
+      "shadow-cyan-500/50",
+      "w-2/5"
     );
 
     const dayNameDiv = document.createElement("div");
@@ -225,7 +225,7 @@ export function displaySearchResults(locations: Location[]) {
   locations.forEach((location) => {
     const resultItem = document.createElement("div");
     resultItem.className =
-      "flex result-item text-xl h-10 cursor-pointer self-center";
+      "flex result-item text-xl h-10 cursor-pointer self-center p-2";
     resultItem.textContent = `${location.name}, ${location.country}`;
 
     const divider = document.createElement("hr");
@@ -357,7 +357,8 @@ export function displayMyPlaces() {
         "border-cardItemBorder",
         "shadow-lg",
         "shadow-cyan-500/50",
-        "items-center"
+        "items-center",
+        "w-48"
       );
 
       const cityNameDiv = document.createElement("div");
@@ -443,7 +444,11 @@ function showLocationDetailsModal(
           defaultPlaceLabel.textContent = location.name;
         }
 
-        updateWeather(defaultWeather, defaultDailyWeather[0]);
+        updateWeather(
+          defaultWeather,
+          defaultDailyWeather[0],
+          getLiveLocationReverseGeocode
+        );
         update7DayForecast(defaultDailyWeather);
         console.log("Current weather for: ", location, defaultWeather);
         console.log("7 day forecast for: ", location, defaultDailyWeather[0]);

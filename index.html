@@ -12,7 +12,7 @@
      crossorigin=""></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
+    <title>Weather Application</title>
   </head>
   <body class="bg-customBlue overflow-y-scroll h-screen">
     <header>
@@ -159,19 +159,26 @@
           </div>
         </div>
 
-        <div class="seven-day-forecast mt-8 w-11/12">
+        <div class="seven-day-forecast mt-4 w-11/12">
           <h2 class="text-2xl font-thin text-white mb-4">7-Day Forecast</h2>
           <div
             class="forecast-container overflow-x-auto no-scrollbar py-2 pb-8 shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2"
           ></div>
         </div>
 
-        <div class="my-places mt-8 w-11/12">
+        <div class="my-places mt-4 w-11/12">
           <h2 class="text-2xl font-thin text-white mb-4">My Places</h2>
           <div class="places-container overflow-x-auto no-scrollbar py-2 pb-8
           shadow-cyan-500/ whitespace-nowrap flex flex-row gap-2">
         </div>
       </div>
+
+      <div class="map-area mt-4 w-11/12">
+        <h2 class="text-2xl font-thin text-white mb-4">Map</h2>
+        <div id="map" class="h-96 w-full">
+        </div>
+      </div>
+
     </div>
 
     <div
@@ -200,7 +207,6 @@
       </div>
     </div>
 
-    <div id="map" class="h-80 w-full"></div>
 
     <script type="module" src="/src/main.ts"></script>
     <script type="module" src="/src/openstreetmap.ts"></script>
