@@ -1,114 +1,18 @@
+import {
+  getCoordinates,
+  getLiveLocationReverseGeocode,
+  getPlace7DayForecast,
+  getPlaceCurrentWeather,
+} from "./api";
 import { currentWeather } from "./currentWeatherModel";
 import { DailyWeather } from "./dailyWeatherModel";
-
-function getWeatherDescription(weatherCode: number): string {
-  switch (weatherCode) {
-    case 0:
-      return "Clear skies";
-    case 1:
-      return "Mainly clear";
-    case 2:
-      return "Partly cloudy";
-    case 3:
-      return "Overcast";
-    case 45:
-      return "Fog";
-    case 48:
-      return "Depositing rime fog";
-    case 51:
-      return "Drizzle: Light";
-    case 53:
-      return "Drizzle: Moderate";
-    case 55:
-      return "Drizzle: Dense intensity";
-    case 56:
-      return "Freezing Drizzle: Light";
-    case 57:
-      return "Freezing Drizzle: Dense intensity";
-    case 61:
-      return "Rain: Slight";
-    case 63:
-      return "Rain: Moderate";
-    case 65:
-      return "Rain: Heavy intensity";
-    case 66:
-      return "Freezing Rain: Light";
-    case 67:
-      return "Freezing Rain: Heavy intensity";
-    case 71:
-      return "Snow fall: Slight";
-    case 73:
-      return "Snow fall: Moderate";
-    case 75:
-      return "Snow fall: Heavy intensity";
-    case 77:
-      return "Snow grains";
-    case 80:
-      return "Rain showers: Slight";
-    case 81:
-      return "Rain showers: Moderate";
-    case 82:
-      return "Rain showers: Violent";
-    case 85:
-      return "Snow showers slight";
-    case 86:
-      return "Snow showers heavy";
-    case 95:
-      return "Thunderstorm: Slight/moderate";
-    case 96:
-      return "Thunderstorm with slight hail";
-    case 99:
-      return "Thunderstorm with heavy hail";
-    default:
-      return "Unknown weather code";
-  }
-}
-
-function getWeatherIcon(weatherCode: number): string {
-  switch (weatherCode) {
-    case 0:
-      return "assets/sun.png";
-    case 1:
-      return "assets/mainly-clear.png";
-    case 2:
-      return "assets/partly-cloudy.png";
-    case 3:
-      return "assets/overcast.png";
-    case 45:
-    case 48:
-      return "assets/fog.png";
-    case 51:
-    case 53:
-    case 55:
-    case 56:
-    case 57:
-      return "assets/drizzle.png";
-    case 61:
-    case 63:
-    case 65:
-    case 66:
-    case 67:
-      return "assets/rain-showers.png";
-    case 71:
-    case 73:
-    case 75:
-    case 77:
-      return "assets/snow.png";
-    case 80:
-    case 81:
-    case 82:
-      return "assets/rain-showers.png";
-    case 85:
-    case 86:
-      return "assets/snow-shower.png";
-    case 95:
-    case 96:
-    case 99:
-      return "assets/thunderstorm.png";
-    default:
-      return "assets/partly-cloudy.png";
-  }
-}
+import { Location } from "./locationModel";
+import { addMarker } from "./openstreetmap";
+import {
+  convertDirection,
+  getWeatherDescription,
+  getWeatherIcon,
+} from "./util";
 
 export function updateWeatherDescription(weatherCode: number): void {
   const description = getWeatherDescription(weatherCode);
@@ -128,6 +32,20 @@ export function updateWeatherIcon(weatherCode: number): void {
     weatherIconElement.setAttribute("alt", getWeatherDescription(weatherCode));
   } else {
     console.error("No element found with class .weather-icon");
+  }
+}
+
+export async function updateLocationName(callback: () => Promise<string>) {
+  const locationLabel = document.querySelector(".defaultPlace-label");
+  if (locationLabel) {
+    const defaultLocation = JSON.parse(
+      localStorage.getItem("defaultLocation") || "{}"
+    );
+    if (Object.keys(defaultLocation).length !== 0) {
+      locationLabel.textContent = defaultLocation.name;
+    } else {
+      locationLabel.textContent = await callback();
+    }
   }
 }
 
@@ -162,8 +80,15 @@ export function updateSunsetTime(time: string) {
 // MARK: - Current weather update function
 export function updateWeather(
   currentWeather: currentWeather,
-  todayWeather: DailyWeather
+  todayWeather: DailyWeather,
+  liveLocationGeocode: () => Promise<string>
 ) {
+  const defaultLocation = JSON.parse(
+    localStorage.getItem("defaultLocation") || "{}"
+  );
+  if (Object.keys(defaultLocation).length === 0) {
+    updateLocationName(liveLocationGeocode);
+  }
   updateCurrentTemperature(currentWeather.temperature_2m);
   updateWeatherDescription(currentWeather.weather_code);
   updateApparentTemperature(currentWeather.apparent_temperature);
@@ -189,12 +114,13 @@ export function update7DayForecast(forecast: DailyWeather[]) {
       "flex-col",
       "justify-between",
       "bg-gray-200",
-      "p-4",
+      "p-2",
       "rounded-lg",
       "border",
       "border-cardItemBorder",
       "shadow-lg",
-      "shadow-cyan-500/50"
+      "shadow-cyan-500/50",
+      "w-2/5"
     );
 
     const dayNameDiv = document.createElement("div");
@@ -275,4 +201,270 @@ export function update7DayForecast(forecast: DailyWeather[]) {
 
     forecastContainer.appendChild(forecastDayDiv);
   });
+}
+
+export async function handleSearch() {
+  const searchInput = (
+    document.getElementById("search-bar") as HTMLInputElement
+  ).value;
+
+  try {
+    const locations: Location[] = await getCoordinates(searchInput);
+    displaySearchResults(locations);
+  } catch (error) {
+    console.error("Error handling search:", error);
+  }
+}
+
+export function displaySearchResults(locations: Location[]) {
+  const resultsContainer = document.getElementById("results-container");
+  if (!resultsContainer) return;
+
+  resultsContainer.innerHTML = "";
+
+  locations.forEach((location) => {
+    const resultItem = document.createElement("div");
+    resultItem.className =
+      "flex result-item text-xl h-10 cursor-pointer self-center p-2";
+    resultItem.textContent = `${location.name}, ${location.country}`;
+
+    const divider = document.createElement("hr");
+    divider.classList.add(
+      "section-divider",
+      "h-0.5",
+      "m-0.5",
+      "bg-gray-500",
+      "border-0"
+    );
+
+    resultItem.addEventListener("click", async () => {
+      try {
+        const weatherData: currentWeather = await getPlaceCurrentWeather(
+          location.latitude,
+          location.longitude
+        );
+        showModal(location, weatherData);
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+      }
+    });
+
+    resultsContainer.appendChild(resultItem);
+    resultsContainer.appendChild(divider);
+  });
+
+  const clearBtn = document.getElementById("clear-btn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", clearSearch);
+  }
+}
+
+function clearSearch() {
+  const searchBar = document.getElementById("search-bar") as HTMLInputElement;
+  const resultsContainer = document.getElementById("results-container");
+
+  if (searchBar) {
+    searchBar.value = "";
+  }
+
+  if (resultsContainer) {
+    resultsContainer.innerHTML = "";
+  }
+}
+
+export function showModal(location: Location, weatherData: currentWeather) {
+  const modal = document.getElementById("weather-modal");
+  if (!modal) return;
+
+  document.body.classList.add("modal-open");
+  modal.style.display = "flex";
+
+  const modalContent = document.getElementById("modal-weather-details");
+  if (!modalContent) return;
+
+  modalContent.innerHTML = `
+    <h2 class="text-3xl">${location.name}</h2>
+    <p>Temperature: ${weatherData.temperature_2m}˚C</p>
+    <p>${getWeatherDescription(weatherData.weather_code)}</p>
+    <img src="${getWeatherIcon(
+      weatherData.weather_code
+    )}" alt="${getWeatherDescription(
+    weatherData.weather_code
+  )}" class="w-8 h-8"/>
+    <div class="flex flex-row">
+      <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
+      />
+      <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
+    weatherData.wind_direction_10m
+  )}</p>
+    </div>
+  `;
+
+  const addToPlacesBtn = document.getElementById("add-to-places");
+  if (addToPlacesBtn) {
+    addToPlacesBtn.onclick = () => {
+      addToPlaces(location);
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+    addToPlacesBtn.addEventListener("click", clearSearch);
+  }
+
+  const closeModalBtn = document.getElementById("close-modal-btn");
+  if (closeModalBtn) {
+    closeModalBtn.onclick = () => {
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+    closeModalBtn.addEventListener("click", clearSearch);
+  }
+}
+
+function addToPlaces(location: Location) {
+  const places = JSON.parse(localStorage.getItem("places") || "[]");
+  console.log(places);
+  places.push(location);
+  localStorage.setItem("places", JSON.stringify(places));
+  displayMyPlaces();
+  addMarker(location);
+}
+
+// MARK: - My Places weather details
+export function displayMyPlaces() {
+  const places: Location[] = JSON.parse(localStorage.getItem("places") || "[]");
+  const placesContainer = document.querySelector(".places-container");
+  if (!placesContainer) return;
+
+  placesContainer.innerHTML = "";
+
+  places.forEach(async (place: Location) => {
+    try {
+      const weatherData: currentWeather = await getPlaceCurrentWeather(
+        place.latitude,
+        place.longitude
+      );
+      const placeDiv = document.createElement("div");
+      placeDiv.classList.add(
+        "place-card",
+        "flex",
+        "flex-col",
+        "justify-between",
+        "bg-gray-200",
+        "p-4",
+        "rounded-lg",
+        "justify-between",
+        "border",
+        "border-cardItemBorder",
+        "shadow-lg",
+        "shadow-cyan-500/50",
+        "items-center",
+        "w-48"
+      );
+
+      const cityNameDiv = document.createElement("div");
+      cityNameDiv.classList.add("city", "text-black", "text-lg");
+      cityNameDiv.textContent = place.name;
+
+      const temperatureDiv = document.createElement("div");
+      temperatureDiv.classList.add("temperature", "text-black", "text-sm");
+      temperatureDiv.textContent = `${weatherData.temperature_2m}˚C`;
+
+      const weatherIcon = document.createElement("img");
+      weatherIcon.classList.add(
+        "weather-icon",
+        "w-8",
+        "h-8",
+        "justify-center",
+        "self-center"
+      );
+      weatherIcon.src = getWeatherIcon(weatherData.weather_code);
+      weatherIcon.alt = getWeatherDescription(weatherData.weather_code);
+
+      placeDiv.addEventListener("click", () => {
+        showLocationDetailsModal(place, weatherData);
+      });
+
+      placeDiv.appendChild(cityNameDiv);
+      placeDiv.appendChild(temperatureDiv);
+      placeDiv.appendChild(weatherIcon);
+
+      placesContainer.appendChild(placeDiv);
+    } catch (error) {
+      console.error(`Error fetching weather data for ${place.name}:`, error);
+    }
+  });
+}
+
+function showLocationDetailsModal(
+  location: Location,
+  weatherData: currentWeather
+) {
+  const modal = document.getElementById("places-weather-modal");
+  if (!modal) return;
+
+  document.body.classList.add("modal-open");
+  modal.style.display = "flex";
+
+  const modalContent = document.getElementById("place-modal-weather-details");
+  if (!modalContent) return;
+
+  modalContent.innerHTML = `
+    <h2 class="text-3xl">${location.name}</h2>
+    <p>Temperature: ${weatherData.temperature_2m}˚C</p>
+    <p>${getWeatherDescription(weatherData.weather_code)}</p>
+    <img src="${getWeatherIcon(
+      weatherData.weather_code
+    )}" alt="${getWeatherDescription(
+    weatherData.weather_code
+  )}" class="w-8 h-8"/>
+    <div class="flex flex-row">
+    <img src="assets/wind.png" alt="Wind conditions" class="w-8 h-8"
+    />
+    <p>${weatherData.wind_speed_10m}km/h, ${convertDirection(
+    weatherData.wind_direction_10m
+  )}</p>
+    </div>
+  `;
+
+  const makeDefaultBtn = document.getElementById("make-default-btn");
+  if (makeDefaultBtn) {
+    makeDefaultBtn.onclick = async () => {
+      localStorage.setItem("defaultLocation", JSON.stringify(location));
+      try {
+        const defaultWeather = await getPlaceCurrentWeather(
+          location.latitude,
+          location.longitude
+        );
+        const defaultDailyWeather = await getPlace7DayForecast(
+          location.latitude,
+          location.longitude
+        );
+        const defaultPlaceLabel = document.querySelector(".defaultPlace-label");
+        if (defaultPlaceLabel) {
+          defaultPlaceLabel.textContent = location.name;
+        }
+
+        updateWeather(
+          defaultWeather,
+          defaultDailyWeather[0],
+          getLiveLocationReverseGeocode
+        );
+        update7DayForecast(defaultDailyWeather);
+        console.log("Current weather for: ", location, defaultWeather);
+        console.log("7 day forecast for: ", location, defaultDailyWeather[0]);
+      } catch (error) {
+        console.error("Error fetching default location weather data:", error);
+      }
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    };
+  }
+
+  const closeModalBtn = document.getElementById("close-modal-btn-two");
+  if (closeModalBtn) {
+    closeModalBtn.onclick = () => {
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open-two");
+    };
+  }
 }
