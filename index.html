@@ -100,61 +100,31 @@
 
     <div class="content">
       <div class="flex flex-col justify-center items-center">
-        <div
-          class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center"
-        >
+        <div class="flex flex-row gap-8 w-11/12 h-1/4 rounded-lg bg-cardItemGreen px-4 py-2 justify-center items-center">
           <div class="flex flex-col gap-2">
-            <div class="defaultPlace-label text-white font-thin text-lg"></div> 
-            <div
-              class="current-temperature text-white font-semibold font-sans text-7xl"
-            ></div>
-
-            <div
-              class="weather-description flex font-sans text-lg text-white"
-            ></div>
-
+            <div class="defaultPlace-label text-white font-thin text-lg md:text-xl lg:text-2xl"></div> 
+            <div class="current-temperature text-white font-semibold font-sans text-4xl md:text-5xl lg:text-7xl"></div>
+            <div class="weather-description flex font-sans text-base md:text-lg lg:text-xl text-white"></div>
             <div class="flex flex-row">
-              <label
-                for="apparent-temperature"
-                class="flex font-sans font-light text-white text-sm mr-2 self-center"
-                >Feels like:</label
-              >
-              <div
-                class="apparent-temperature flex font-sans text-lg text-white self-center"
-              ></div>
+              <label for="apparent-temperature" class="flex font-sans font-light text-white text-sm md:text-base lg:text-lg mr-2 self-center">Feels like:</label>
+              <div class="apparent-temperature flex font-sans text-base md:text-lg lg:text-xl text-white self-center"></div>
             </div>
           </div>
-
+        
           <div class="flex flex-col gap-2">
             <div class="flex justify-center">
-              <img
-                class="weather-icon w-24 h-24 mr-4"
-                src=""
-                alt="Weather Icon"
-              />
+              <img class="weather-icon w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mr-4" src="" alt="Weather Icon" />
             </div>
             <div class="flex flex-row justify-center">
-              <img src="assets/sunrise.png" alt="sunrise" class="w-8 h-8" />
-              <label
-                for="sunrise"
-                class="flex font-sans font-light text-white text-sm m-2"
-                >Sunrise:</label
-              >
-              <div
-                class="sunrise-time flex font-sans text-base text-white self-center"
-              ></div>
+              <img src="assets/sunrise.png" alt="sunrise" class="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
+              <label for="sunrise" class="flex font-sans font-light text-white text-sm md:text-base lg:text-lg m-2">Sunrise:</label>
+              <div class="sunrise-time flex font-sans text-base md:text-lg lg:text-xl text-white self-center"></div>
             </div>
-
+        
             <div class="flex flex-row justify-center">
-              <img src="assets/sunset.png" alt="sunset" class="w-8 h-8" />
-              <label
-                for="sunset"
-                class="flex font-sans text-white font-light text-sm m-2"
-                >Sunset:</label
-              >
-              <div
-                class="sunset-time flex font-sans text-base text-white self-center"
-              ></div>
+              <img src="assets/sunset.png" alt="sunset" class="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
+              <label for="sunset" class="flex font-sans font-light text-white text-sm md:text-base lg:text-lg m-2">Sunset:</label>
+              <div class="sunset-time flex font-sans text-base md:text-lg lg:text-xl text-white self-center"></div>
             </div>
           </div>
         </div>
